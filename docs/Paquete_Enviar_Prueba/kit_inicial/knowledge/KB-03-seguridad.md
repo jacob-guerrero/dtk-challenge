@@ -1,0 +1,2 @@
+# KB-03 — Control de acceso a operaciones
+Documento sintético FleetPulse. El asistente ofrece orientación y citas, no ejecuta cambios en vehículos, repositorios, sistemas externos o datos privados. Nunca expone secretos, API keys, tokens ni variables de entorno. Solicitudes de desbloqueo, inmovilización y borrado requieren un procedimiento de autorización humana fuera de las facultades del asistente.
