@@ -9,7 +9,9 @@
   "scripts": {
     "db:up": "docker compose up -d --wait postgres",
     "db:down": "docker compose down",
-    "typecheck": "pnpm -r --if-present typecheck",
+    "db:migrate": "node --env-file=.env --import tsx database/migrate.ts",
+    "db:reset": "docker compose down -v && docker compose up -d --wait postgres && pnpm db:migrate",
+    "typecheck": "pnpm -r --if-present typecheck && tsc --noEmit -p database/tsconfig.json",
     "lint": "eslint .",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}\"",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}\""
@@ -19,7 +21,12 @@
     "@types/node": "^22.18.0",
     "eslint": "^9.39.0",
     "prettier": "^3.6.0",
+    "tsx": "^4.20.0",
     "typescript": "^5.9.0",
-    "typescript-eslint": "^8.46.0"
+    "typescript-eslint": "^8.46.0",
+    "@types/pg": "^8.15.0"
+  },
+  "dependencies": {
+    "pg": "^8.16.0"
   }
 }

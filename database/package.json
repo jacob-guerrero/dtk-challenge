@@ -1,0 +1,5 @@
+{
+  "name": "@fleetpulse/database",
+  "private": true,
+  "type": "module"
+}
