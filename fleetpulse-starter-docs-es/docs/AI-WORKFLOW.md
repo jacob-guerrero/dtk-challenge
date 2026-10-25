@@ -254,6 +254,46 @@ No correction was required in this session.
 
 Accepted.
 
+## Session 6 — Angular dashboard
+
+**Goal**
+
+Build a compact Angular dashboard with REST snapshots, live SSE updates,
+vehicle search, alerts, and event history.
+
+**Prompt**
+
+Implement the required Angular CSR dashboard without maps or charts. Use the
+local development proxy so the browser never receives the ingestion API key.
+
+**Files changed**
+
+- `frontend/` Angular application, proxy, and build configuration
+- root scripts and dashboard documentation
+
+**Agent verification**
+
+Backend integration tests remained green after adding the frontend workspace.
+
+**Human verification**
+
+The initial frontend build found a missing `@angular/forms` dependency and an
+Angular 22 requirement for TypeScript 6 while the workspace used TypeScript
+5.9.
+
+**Mistake/correction**
+
+The frontend dependencies were incomplete and incompatible with Angular 22.
+`@angular/forms` was added, and TypeScript and Vitest were aligned with the
+Angular build requirements. Build and dashboard checks must be rerun.
+
+**Outcome**
+
+Accepted. `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, 13 integration
+tests, and the Angular production build passed. During the live replay, the
+dashboard received SSE updates without a browser reload and showed the
+official final state: 8 vehicles and 4 alerts.
+
 ## Final retrospective points
 
 Al terminar, resumir:

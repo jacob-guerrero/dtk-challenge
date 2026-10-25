@@ -65,6 +65,21 @@ Usar `start`, `pause`, `resume`, `restart`, `status` y `quit`. El intervalo
 por defecto es 750 ms; se puede cambiar en `.env` con `REPLAY_INTERVAL_MS`.
 `restart` reinicia el cursor, no borra la base de datos.
 
+## Dashboard Angular
+
+Con `pnpm dev` ejecutando la API, iniciar el dashboard en otra terminal:
+
+```bash
+pnpm dev:web
+```
+
+Abrir `http://localhost:4200`. El proxy de desarrollo reenvía `/api` al
+backend local; la API key nunca llega al navegador.
+
+Si se ejecuta `pnpm db:reset` mientras el dashboard ya está abierto, usar
+**Refresh snapshot** antes de iniciar un replay. El reset elimina datos de
+forma local y no produce eventos SSE de eliminación.
+
 ## Pruebas de integración
 
 ```bash
