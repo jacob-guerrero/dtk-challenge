@@ -17,6 +17,39 @@ export type PersistedEventResult = {
   alertCreated: boolean;
 };
 
+type VehicleRow = {
+  event_id: string;
+  vehicle_id: string;
+  observed_at: Date;
+  latitude: number;
+  longitude: number;
+  speed_kph: number;
+  ignition_on: boolean;
+  status: 'OFF' | 'STOPPED' | 'MOVING';
+};
+
+type AlertRow = {
+  id: number;
+  type: 'OVERSPEED';
+  event_id: string;
+  vehicle_id: string;
+  observed_at: Date;
+  created_at: Date;
+};
+
+function vehicleResponse(row: VehicleRow) {
+  return {
+    eventId: row.event_id,
+    vehicleId: row.vehicle_id,
+    observedAt: row.observed_at.toISOString(),
+    latitude: row.latitude,
+    longitude: row.longitude,
+    speedKph: row.speed_kph,
+    ignitionOn: row.ignition_on,
+    status: row.status,
+  };
+}
+
 function samePayload(event: TelemetryEvent, stored: StoredEvent): boolean {
   return (
     event.vehicleId === stored.vehicle_id &&
@@ -109,5 +142,56 @@ export class TelemetryRepository {
     } finally {
       client.release();
     }
+  }
+
+  async listVehicles(search?: string) {
+    const result = await this.pool.query<VehicleRow>(
+      `SELECT DISTINCT ON (vehicle_id)
+         event_id, vehicle_id, observed_at, latitude, longitude, speed_kph, ignition_on,
+         CASE
+           WHEN ignition_on = false THEN 'OFF'
+           WHEN speed_kph = 0 THEN 'STOPPED'
+           ELSE 'MOVING'
+         END AS status
+       FROM telemetry_events
+       WHERE ($1::text IS NULL OR vehicle_id ILIKE '%' || $1 || '%')
+       ORDER BY vehicle_id, observed_at DESC, event_id DESC`,
+      [search?.trim() || null],
+    );
+    return result.rows.map(vehicleResponse);
+  }
+
+  async listVehicleEvents(vehicleId: string) {
+    const result = await this.pool.query<VehicleRow>(
+      `SELECT event_id, vehicle_id, observed_at, latitude, longitude, speed_kph, ignition_on,
+         CASE
+           WHEN ignition_on = false THEN 'OFF'
+           WHEN speed_kph = 0 THEN 'STOPPED'
+           ELSE 'MOVING'
+         END AS status
+       FROM telemetry_events
+       WHERE vehicle_id = $1
+       ORDER BY observed_at ASC, event_id ASC`,
+      [vehicleId],
+    );
+    return result.rows.map(vehicleResponse);
+  }
+
+  async listAlerts() {
+    const result = await this.pool.query<AlertRow>(
+      `SELECT alerts.id, alerts.type, alerts.event_id, alerts.vehicle_id,
+         telemetry_events.observed_at, alerts.created_at
+       FROM alerts
+       JOIN telemetry_events ON telemetry_events.event_id = alerts.event_id
+       ORDER BY alerts.created_at DESC, alerts.id DESC`,
+    );
+    return result.rows.map((alert) => ({
+      id: alert.id,
+      type: alert.type,
+      eventId: alert.event_id,
+      vehicleId: alert.vehicle_id,
+      observedAt: alert.observed_at.toISOString(),
+      createdAt: alert.created_at.toISOString(),
+    }));
   }
 }

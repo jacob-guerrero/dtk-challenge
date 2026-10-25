@@ -138,6 +138,43 @@ before reading batch counters.
 Accepted. `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and all six
 integration tests passed after the correction.
 
+## Session 3 — Fleet query API
+
+**Goal**
+
+Expose current vehicle state, vehicle history, alerts, health, and API
+documentation without adding mutable state for vehicles.
+
+**Prompt**
+
+Implement Phase 3 query endpoints with deterministic ordering. Derive current
+state from `observedAt` and `eventId`; preserve the existing ingestion API.
+
+**Files changed**
+
+- `backend/src/telemetry-repository.ts`
+- `backend/src/app.ts`
+- `backend/src/openapi.ts`
+- integration tests and API documentation
+
+**Agent verification**
+
+Query behavior was covered with integration tests for latest state, ordered
+history, historical alerts, and health.
+
+**Human verification**
+
+`pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and all nine integration
+tests passed.
+
+**Mistake/correction**
+
+No correction was required in this session.
+
+**Outcome**
+
+Accepted.
+
 ## Final retrospective points
 
 Al terminar, resumir:

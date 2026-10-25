@@ -44,6 +44,10 @@ Durante la fase de ingestión, iniciar la API con `pnpm dev` y enviar eventos
 a `POST /api/events/batch`. El header `X-API-Key` debe coincidir con
 `INGEST_API_KEY` de `.env`.
 
+La documentación interactiva está disponible en
+`http://localhost:3000/api/docs` y el documento OpenAPI en
+`http://localhost:3000/api/openapi.json`.
+
 ## Pruebas de integración
 
 ```bash

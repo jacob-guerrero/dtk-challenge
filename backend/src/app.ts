@@ -5,6 +5,8 @@ import express, {
   type Response,
 } from 'express';
 import type { Pool } from 'pg';
+import swaggerUi from 'swagger-ui-express';
+import { openapi } from './openapi.js';
 import {
   batchSchema,
   eventIdFrom,
@@ -88,6 +90,52 @@ export function createApp(pool: Pool, ingestApiKey: string) {
   const repository = new TelemetryRepository(pool);
 
   app.use(express.json({ limit: '256kb' }));
+  app.get('/api/openapi.json', (_request, response) => response.json(openapi));
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapi));
+
+  app.get('/api/health', async (_request, response, next) => {
+    try {
+      await pool.query('SELECT 1');
+      response.status(200).json({ status: 'ok', database: 'ok' });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get('/api/vehicles', async (request, response, next) => {
+    try {
+      const search =
+        typeof request.query.search === 'string'
+          ? request.query.search
+          : undefined;
+      response
+        .status(200)
+        .json({ vehicles: await repository.listVehicles(search) });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get(
+    '/api/vehicles/:vehicleId/events',
+    async (request, response, next) => {
+      try {
+        response.status(200).json({
+          events: await repository.listVehicleEvents(request.params.vehicleId),
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  app.get('/api/alerts', async (_request, response, next) => {
+    try {
+      response.status(200).json({ alerts: await repository.listAlerts() });
+    } catch (error) {
+      next(error);
+    }
+  });
 
   app.post('/api/events/batch', async (request, response, next) => {
     if (!apiKeyMatches(request.header('X-API-Key'), ingestApiKey)) {

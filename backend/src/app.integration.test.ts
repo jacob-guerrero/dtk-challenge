@@ -30,20 +30,24 @@ function event(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function endpoint() {
+function apiUrl(path: string) {
   if (!server) {
     throw new Error('Test server is not listening.');
   }
   const { port } = server.address() as AddressInfo;
-  return `http://127.0.0.1:${port}/api/events/batch`;
+  return `http://127.0.0.1:${port}${path}`;
 }
 
 async function send(events: unknown[], key = apiKey) {
-  return fetch(endpoint(), {
+  return fetch(apiUrl('/api/events/batch'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
     body: JSON.stringify({ events }),
   });
+}
+
+async function get(path: string) {
+  return fetch(apiUrl(path));
 }
 
 beforeAll(async () => {
@@ -166,5 +170,84 @@ describe('POST /api/events/batch', () => {
       'rowCount',
       1,
     );
+  });
+});
+
+describe('fleet query endpoints', () => {
+  it('derives current vehicle state from newest observedAt and supports search', async () => {
+    await send([
+      event({
+        eventId: 'E-LATEST',
+        observedAt: '2026-10-18T10:10:00Z',
+        speedKph: 0,
+      }),
+      event({
+        eventId: 'E-LATE',
+        observedAt: '2026-10-18T09:55:00Z',
+        speedKph: 95,
+      }),
+      event({ eventId: 'E-OTHER', vehicleId: 'VEH-OTHER', ignitionOn: false }),
+    ]);
+
+    const response = await get('/api/vehicles?search=VEH-TEST');
+
+    expect(await response.json()).toMatchObject({
+      vehicles: [
+        {
+          vehicleId: 'VEH-TEST',
+          eventId: 'E-LATEST',
+          status: 'STOPPED',
+        },
+      ],
+    });
+  });
+
+  it('returns event history in observedAt and eventId order', async () => {
+    await send([
+      event({ eventId: 'E-002', observedAt: '2026-10-18T10:05:00Z' }),
+      event({ eventId: 'E-001', observedAt: '2026-10-18T10:00:00Z' }),
+      event({ eventId: 'E-003', observedAt: '2026-10-18T10:05:00Z' }),
+    ]);
+
+    const response = await get('/api/vehicles/VEH-TEST/events');
+    const body = (await response.json()) as {
+      events: Array<{ eventId: string }>;
+    };
+
+    expect(body.events.map((storedEvent) => storedEvent.eventId)).toEqual([
+      'E-001',
+      'E-002',
+      'E-003',
+    ]);
+  });
+
+  it('returns historical overspeed alerts and a safe health response', async () => {
+    await send([
+      event({ eventId: 'E-ALERT-1', speedKph: 81 }),
+      event({ eventId: 'E-NO-ALERT', speedKph: 80 }),
+      event({ eventId: 'E-ALERT-2', speedKph: 95 }),
+    ]);
+
+    const [alertsResponse, healthResponse] = await Promise.all([
+      get('/api/alerts'),
+      get('/api/health'),
+    ]);
+    const alerts = (await alertsResponse.json()) as {
+      alerts: Array<{ type: string; eventId: string }>;
+    };
+
+    expect(alerts.alerts).toHaveLength(2);
+    expect(alerts.alerts.map((alert) => alert.type)).toEqual([
+      'OVERSPEED',
+      'OVERSPEED',
+    ]);
+    expect(alerts.alerts.map((alert) => alert.eventId)).toEqual([
+      'E-ALERT-2',
+      'E-ALERT-1',
+    ]);
+    expect(await healthResponse.json()).toEqual({
+      status: 'ok',
+      database: 'ok',
+    });
   });
 });
