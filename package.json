@@ -11,6 +11,8 @@
     "db:down": "docker compose down",
     "db:migrate": "node --env-file=.env --import tsx database/migrate.ts",
     "db:reset": "docker compose down -v && docker compose up -d --wait postgres && pnpm db:migrate",
+    "dev": "pnpm --filter @fleetpulse/backend dev",
+    "test:integration": "node --env-file=.env node_modules/vitest/vitest.mjs run",
     "typecheck": "pnpm -r --if-present typecheck && tsc --noEmit -p database/tsconfig.json",
     "lint": "eslint .",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}\"",
@@ -24,7 +26,8 @@
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.46.0",
-    "@types/pg": "^8.15.0"
+    "@types/pg": "^8.15.0",
+    "vitest": "^3.2.0"
   },
   "dependencies": {
     "pg": "^8.16.0"

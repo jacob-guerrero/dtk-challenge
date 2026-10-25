@@ -21,6 +21,7 @@ cp .env.example .env
 pnpm install
 pnpm db:up
 pnpm db:migrate
+pnpm dev
 pnpm typecheck
 pnpm lint
 ```
@@ -36,3 +37,19 @@ pnpm db:reset
 ```
 
 Este comando elimina únicamente el volumen de PostgreSQL de este proyecto.
+
+## Rutas disponibles
+
+Durante la fase de ingestión, iniciar la API con `pnpm dev` y enviar eventos
+a `POST /api/events/batch`. El header `X-API-Key` debe coincidir con
+`INGEST_API_KEY` de `.env`.
+
+## Pruebas de integración
+
+```bash
+pnpm test:integration
+```
+
+La suite usa la base configurada en `.env` y elimina los registros de
+`telemetry_events` y `alerts` antes de cada caso. Úsala solamente contra
+datos locales desechables.

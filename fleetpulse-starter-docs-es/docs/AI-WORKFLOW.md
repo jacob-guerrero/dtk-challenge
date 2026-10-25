@@ -95,6 +95,49 @@ unsupported calls were removed. A local `database/package.json` with
 
 Accepted.
 
+## Session 2 — Telemetry ingestion
+
+**Goal**
+
+Implement authenticated, per-event telemetry ingestion with idempotency and
+overspeed alerts.
+
+**Prompt**
+
+Implement only Phase 2 backend ingestion following the API contract. Keep
+transactions per event and do not add query, realtime, or frontend routes.
+
+**Files changed**
+
+- `backend/src/app.ts`
+- `backend/src/index.ts`
+- `backend/src/telemetry.ts`
+- `backend/src/telemetry-repository.ts`
+- backend and root package scripts
+
+**Agent verification**
+
+`pnpm typecheck` passed. Formatting was applied and verified.
+
+**Human verification**
+
+`pnpm lint` found an unused fourth argument in Express error middleware.
+The initial integration-test run then found an untyped JSON body and a
+server-start hook that subscribed after the server was already listening.
+
+**Mistake/correction**
+
+Express uses a four-argument function to identify error middleware. The
+required `next` argument is now explicitly marked as intentionally unused,
+so the middleware keeps its required signature and satisfies linting. The
+test now starts its server inside `beforeAll` and types its JSON response
+before reading batch counters.
+
+**Outcome**
+
+Accepted. `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and all six
+integration tests passed after the correction.
+
 ## Final retrospective points
 
 Al terminar, resumir:
