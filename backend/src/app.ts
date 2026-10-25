@@ -6,6 +6,7 @@ import express, {
 } from 'express';
 import type { Pool } from 'pg';
 import swaggerUi from 'swagger-ui-express';
+import type { AnswerGenerator } from './answer-generator.js';
 import { EventBus, alertCreated, vehicleUpdated } from './event-bus.js';
 import { openapi } from './openapi.js';
 import { SupportService } from './support-service.js';
@@ -87,10 +88,14 @@ function summarize(results: BatchResult[]) {
   };
 }
 
-export function createApp(pool: Pool, ingestApiKey: string) {
+export function createApp(
+  pool: Pool,
+  ingestApiKey: string,
+  answerGenerator?: AnswerGenerator,
+) {
   const app = express();
   const repository = new TelemetryRepository(pool);
-  const supportService = new SupportService(pool);
+  const supportService = new SupportService(pool, answerGenerator);
   const eventBus = new EventBus();
 
   app.use(express.json({ limit: '256kb' }));

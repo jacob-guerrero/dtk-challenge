@@ -1,4 +1,9 @@
 import type { Pool } from 'pg';
+import {
+  ExtractiveAnswerGenerator,
+  type AnswerGenerator,
+  type EvidenceCitation,
+} from './answer-generator.js';
 
 type KnowledgeChunk = {
   source_id: string;
@@ -13,7 +18,7 @@ type EventEvidence = {
   speed_kph: number;
 };
 
-export type Citation = { sourceId: string; excerpt: string };
+export type Citation = EvidenceCitation;
 export type RetrievalTrace = Citation & { score: number };
 
 export type SupportAnswer = {
@@ -60,7 +65,10 @@ function eventExcerpt(event: EventEvidence) {
 }
 
 export class SupportService {
-  constructor(private readonly pool: Pool) {}
+  constructor(
+    private readonly pool: Pool,
+    private readonly answerGenerator: AnswerGenerator = new ExtractiveAnswerGenerator(),
+  ) {}
 
   async ask(question: string, vehicleId?: string): Promise<SupportAnswer> {
     const trace = await this.retrieve(question);
@@ -96,18 +104,21 @@ export class SupportService {
       };
     }
 
-    const answerParts: string[] = [];
+    let eventCitation: Citation | undefined;
     if (event) {
       const excerpt = eventExcerpt(event);
-      citations.unshift({ sourceId: `EVENT:${event.event_id}`, excerpt });
-      answerParts.push(`Evento persistido: ${excerpt}.`);
+      eventCitation = { sourceId: `EVENT:${event.event_id}`, excerpt };
+      citations.unshift(eventCitation);
     }
-    answerParts.push(
-      `Según ${selectedEvidence.sourceId}: ${selectedEvidence.excerpt}`,
-    );
 
     return {
-      answer: answerParts.join(' '),
+      answer: await this.answerGenerator.generate({
+        question,
+        knowledgeCitations: citations.filter(
+          (citation) => !citation.sourceId.startsWith('EVENT:'),
+        ),
+        ...(eventCitation ? { eventCitation } : {}),
+      }),
       citations,
       grounded: true,
       retrievalTrace: trace,

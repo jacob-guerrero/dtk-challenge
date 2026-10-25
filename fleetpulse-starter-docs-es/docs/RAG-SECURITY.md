@@ -26,6 +26,10 @@ El `AnswerGenerator` no tiene acceso a:
 - DB writes;
 - secretos.
 
+El adaptador Gemini usa una petición HTTP sin tools y con `store: false`.
+Solo recibe la pregunta y evidencia ya recuperada; la aplicación conserva el
+control de retrieval, abstención y citas.
+
 ## Secret protection
 
 No incluir secrets en prompts.
@@ -46,6 +50,9 @@ Sin evidencia suficiente → abstention.
 `grounded=true` requiere soporte para las afirmaciones factuales.
 
 Citations deben corresponder a evidencia realmente recuperada.
+
+Una falla, salida vacía o respuesta HTTP no exitosa del proveedor usa el
+generador extractivo. Nunca se degrada a una respuesta sin evidencia.
 
 ## Required adversarial checks
 

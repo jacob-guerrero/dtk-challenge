@@ -77,6 +77,18 @@ El índice se reconstruye desde `docs/Paquete_Enviar_Prueba/kit_inicial/knowledg
 en cada ejecución. La API `POST /api/support/ask` devuelve respuesta,
 citas, `grounded` y una traza de recuperación; no requiere una API de LLM.
 
+El modo predeterminado es `LLM_PROVIDER=extractive`, determinista y sin
+credenciales. Para usar Gemini de forma opcional, configurar en `.env`:
+
+```text
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=...
+```
+
+La aplicación mantiene retrieval, grounding y citas; Gemini solo redacta a
+partir de evidencia ya seleccionada. Si Gemini no tiene clave o su petición
+falla, el generador extractivo responde sin cambiar el contrato de la API.
+
 ## Dashboard Angular
 
 Con `pnpm dev` ejecutando la API, iniciar el dashboard en otra terminal:

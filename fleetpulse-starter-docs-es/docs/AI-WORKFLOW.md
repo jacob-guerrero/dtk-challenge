@@ -341,6 +341,54 @@ Accepted. La prueba de extensibilidad también añadió KB-05 sin cambiar
 código, la recuperó con cita y, tras retirar el archivo y reindexar, obtuvo
 abstención sin citas.
 
+## Session 8 — Optional Gemini generator
+
+**Goal**
+
+Add a provider-agnostic Gemini adapter while retaining deterministic,
+credential-free extractive answers.
+
+**Prompt**
+
+Implement an optional Gemini provider without changing application-owned
+retrieval, citations, grounding, abstention, or the API contract. Keep tests
+offline and preserve a fallback when the provider is unavailable.
+
+**Files changed**
+
+- `backend/src/answer-generator.ts`
+- `backend/src/answer-generator.test.ts`
+- backend startup/configuration and support-service wiring
+- `.env.example`, README, and RAG security documentation
+
+**Agent verification**
+
+The provider adapter is tested with injected HTTP responses: it uses the
+server-side Gemini Interactions endpoint, supplies no tools, sets
+`store=false`, includes the event evidence identity, and falls back after a
+provider failure. `pnpm typecheck`, `pnpm lint`, `pnpm format:check`,
+`pnpm test:integration` (18 tests), and the Angular production build passed.
+
+**Human verification**
+
+With `LLM_PROVIDER=gemini` and a personal key configured outside Git, the
+support request for exactly 80 km/h returned a concise answer that correctly
+said no alert is generated. It kept `grounded=true`, cited KB-01, preserved
+the retrieval trace, and exposed no secret.
+
+**Mistake/correction**
+
+Strict TypeScript rejected an optional Gemini key passed as an explicit
+`undefined`; the generator configuration now models that possibility. The
+first mocked-provider test also revealed that the prompt had event facts but
+not the `EVENT:<id>` label. The label is now included so provider input and
+application citation identity agree.
+
+**Outcome**
+
+Accepted. The default remains extractive; Gemini is optional and retains the
+same application-controlled evidence contract.
+
 ## Final retrospective points
 
 Al terminar, resumir:
