@@ -48,6 +48,19 @@ La documentación interactiva está disponible en
 `http://localhost:3000/api/docs` y el documento OpenAPI en
 `http://localhost:3000/api/openapi.json`.
 
+## Reproductor de eventos
+
+Con la API iniciada en otra terminal, ejecutar:
+
+```bash
+pnpm replay
+```
+
+El reproductor carga las 24 líneas del fixture oficial en su orden original.
+Usar `start`, `pause`, `resume`, `restart`, `status` y `quit`. El intervalo
+por defecto es 750 ms; se puede cambiar en `.env` con `REPLAY_INTERVAL_MS`.
+`restart` reinicia el cursor, no borra la base de datos.
+
 ## Pruebas de integración
 
 ```bash

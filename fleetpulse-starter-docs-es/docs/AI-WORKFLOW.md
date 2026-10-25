@@ -175,6 +175,47 @@ No correction was required in this session.
 
 Accepted.
 
+## Session 4 — Controlled replay
+
+**Goal**
+
+Replay the 24 official events progressively, with controls and observable
+results, against the authenticated API.
+
+**Prompt**
+
+Implement the replay CLI without sorting fixture events. Provide start, pause,
+resume, restart, status, and safe API-key handling from environment variables.
+
+**Files changed**
+
+- `replay/src/index.ts`
+- `replay/src/replay.ts`
+- `replay/src/replay.test.ts`
+- replay command and README instructions
+
+**Agent verification**
+
+Automated tests cover JSONL input order and controller accounting. The
+integration suite verifies both official replay oracles.
+
+**Human verification**
+
+The CLI paused at line 11 with no additional events entering. After resume,
+the first run finished with 20 accepted, 2 duplicates, and 2 rejected. A
+restart without database reset finished with 0 accepted, 22 duplicates, and
+2 rejected.
+
+**Mistake/correction**
+
+TypeScript initially retained `INGEST_API_KEY` as optional inside the request
+closure. The validated key was bound to a non-optional constant before use.
+
+**Outcome**
+
+Accepted. `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and 12 tests
+passed.
+
 ## Final retrospective points
 
 Al terminar, resumir:

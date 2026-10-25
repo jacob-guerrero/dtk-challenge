@@ -1,6 +1,8 @@
 import { once } from 'node:events';
+import { readFile } from 'node:fs/promises';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
+import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { Pool } from 'pg';
 import { createApp } from './app.js';
@@ -15,7 +17,14 @@ const pool = new Pool({ connectionString: databaseUrl });
 const app = createApp(pool, apiKey);
 let server: Server | undefined;
 
-type BatchCounts = { accepted: number; duplicates: number };
+type BatchCounts = { accepted: number; duplicates: number; rejected: number };
+
+const fixturePath = fileURLToPath(
+  new URL(
+    '../../docs/Paquete_Enviar_Prueba/kit_inicial/fixtures/events.jsonl',
+    import.meta.url,
+  ),
+);
 
 function event(overrides: Record<string, unknown> = {}) {
   return {
@@ -249,5 +258,47 @@ describe('fleet query endpoints', () => {
       status: 'ok',
       database: 'ok',
     });
+  });
+});
+
+describe('official replay oracle', () => {
+  it('matches the first and second replay totals without a database reset', async () => {
+    const events = (await readFile(fixturePath, 'utf8'))
+      .trim()
+      .split(/\r?\n/)
+      .map((line) => JSON.parse(line) as Record<string, unknown>);
+
+    async function replayOnce() {
+      const totals = { accepted: 0, duplicates: 0, rejected: 0 };
+      for (const replayEvent of events) {
+        const response = await send([replayEvent]);
+        const body = (await response.json()) as BatchCounts;
+        totals.accepted += body.accepted;
+        totals.duplicates += body.duplicates;
+        totals.rejected += body.rejected;
+      }
+      return totals;
+    }
+
+    expect(await replayOnce()).toEqual({
+      accepted: 20,
+      duplicates: 2,
+      rejected: 2,
+    });
+    expect(await replayOnce()).toEqual({
+      accepted: 0,
+      duplicates: 22,
+      rejected: 2,
+    });
+
+    const [vehiclesResponse, alertsResponse] = await Promise.all([
+      get('/api/vehicles'),
+      get('/api/alerts'),
+    ]);
+    const vehicles = (await vehiclesResponse.json()) as { vehicles: unknown[] };
+    const alerts = (await alertsResponse.json()) as { alerts: unknown[] };
+
+    expect(vehicles.vehicles).toHaveLength(8);
+    expect(alerts.alerts).toHaveLength(4);
   });
 });
