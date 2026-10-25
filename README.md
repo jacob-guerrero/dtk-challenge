@@ -48,6 +48,10 @@ La documentación interactiva está disponible en
 `http://localhost:3000/api/docs` y el documento OpenAPI en
 `http://localhost:3000/api/openapi.json`.
 
+Las actualizaciones en vivo usan SSE en `GET /api/stream`. La API emite
+`vehicle.updated` después de un evento aceptado que cambia el estado actual y
+`alert.created` después de crear una alerta confirmada.
+
 ## Reproductor de eventos
 
 Con la API iniciada en otra terminal, ejecutar:

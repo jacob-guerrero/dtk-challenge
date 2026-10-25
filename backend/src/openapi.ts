@@ -43,5 +43,11 @@ export const openapi = {
         responses: { '200': { description: 'Healthy' } },
       },
     },
+    '/api/stream': {
+      get: {
+        summary: 'Receive committed vehicle and alert updates over SSE',
+        responses: { '200': { description: 'Server-sent event stream' } },
+      },
+    },
   },
 };

@@ -59,6 +59,25 @@ async function get(path: string) {
   return fetch(apiUrl(path));
 }
 
+async function readSseUntil(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  expected: string,
+) {
+  const decoder = new TextDecoder();
+  let content = '';
+  for (let index = 0; index < 4; index += 1) {
+    const { done, value } = await reader.read();
+    if (done) {
+      throw new Error(`SSE stream closed before receiving ${expected}.`);
+    }
+    content += decoder.decode(value);
+    if (content.includes(expected)) {
+      return content;
+    }
+  }
+  throw new Error(`SSE stream did not receive ${expected}.`);
+}
+
 beforeAll(async () => {
   server = app.listen(0);
   await once(server, 'listening');
@@ -300,5 +319,36 @@ describe('official replay oracle', () => {
 
     expect(vehicles.vehicles).toHaveLength(8);
     expect(alerts.alerts).toHaveLength(4);
+  });
+});
+
+describe('GET /api/stream', () => {
+  it('emits committed current-state and late-overspeed updates', async () => {
+    const response = await get('/api/stream');
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('SSE response has no body.');
+    }
+
+    await reader.read();
+    await send([
+      event({ eventId: 'E-CURRENT', observedAt: '2026-10-18T10:10:00Z' }),
+    ]);
+    expect(await readSseUntil(reader, 'event: vehicle.updated')).toContain(
+      'E-CURRENT',
+    );
+
+    await send([
+      event({
+        eventId: 'E-LATE-OVERSPEED',
+        observedAt: '2026-10-18T10:00:00Z',
+        speedKph: 95,
+      }),
+    ]);
+    const lateEvent = await readSseUntil(reader, 'event: alert.created');
+
+    expect(lateEvent).toContain('E-LATE-OVERSPEED');
+    expect(lateEvent).not.toContain('event: vehicle.updated');
+    await reader.cancel();
   });
 });

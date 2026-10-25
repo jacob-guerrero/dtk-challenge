@@ -6,6 +6,7 @@ import express, {
 } from 'express';
 import type { Pool } from 'pg';
 import swaggerUi from 'swagger-ui-express';
+import { EventBus, alertCreated, vehicleUpdated } from './event-bus.js';
 import { openapi } from './openapi.js';
 import {
   batchSchema,
@@ -88,6 +89,7 @@ function summarize(results: BatchResult[]) {
 export function createApp(pool: Pool, ingestApiKey: string) {
   const app = express();
   const repository = new TelemetryRepository(pool);
+  const eventBus = new EventBus();
 
   app.use(express.json({ limit: '256kb' }));
   app.get('/api/openapi.json', (_request, response) => response.json(openapi));
@@ -137,6 +139,31 @@ export function createApp(pool: Pool, ingestApiKey: string) {
     }
   });
 
+  app.get('/api/stream', (request, response) => {
+    response.status(200);
+    response.set({
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Content-Type': 'text/event-stream',
+    });
+    response.flushHeaders();
+    response.write(': connected\n\n');
+
+    const heartbeat = setInterval(
+      () => response.write(': heartbeat\n\n'),
+      15_000,
+    );
+    const unsubscribe = eventBus.subscribe((event) => {
+      response.write(
+        `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`,
+      );
+    });
+    request.on('close', () => {
+      clearInterval(heartbeat);
+      unsubscribe();
+    });
+  });
+
   app.post('/api/events/batch', async (request, response, next) => {
     if (!apiKeyMatches(request.header('X-API-Key'), ingestApiKey)) {
       unauthorized(request, response);
@@ -173,6 +200,13 @@ export function createApp(pool: Pool, ingestApiKey: string) {
             reason: 'EVENT_ID_CONFLICT',
           });
           continue;
+        }
+
+        if (persisted.currentStateChanged) {
+          eventBus.publish(vehicleUpdated(parsedEvent.data));
+        }
+        if (persisted.alertId !== null) {
+          eventBus.publish(alertCreated(parsedEvent.data, persisted.alertId));
         }
 
         results.push({

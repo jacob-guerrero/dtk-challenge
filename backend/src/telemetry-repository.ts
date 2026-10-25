@@ -14,7 +14,7 @@ type StoredEvent = {
 export type PersistedEventResult = {
   status: 'ACCEPTED' | 'DUPLICATE' | 'CONFLICT';
   currentStateChanged: boolean;
-  alertCreated: boolean;
+  alertId: number | null;
 };
 
 type VehicleRow = {
@@ -118,24 +118,25 @@ export class TelemetryRepository {
             ? 'DUPLICATE'
             : 'CONFLICT',
           currentStateChanged: false,
-          alertCreated: false,
+          alertId: null,
         };
       }
 
-      let alertCreated = false;
+      let alertId: number | null = null;
       if (event.speedKph > 80) {
-        await client.query(
+        const alert = await client.query<{ id: number }>(
           `INSERT INTO alerts (event_id, vehicle_id, type)
-           VALUES ($1, $2, 'OVERSPEED')`,
+           VALUES ($1, $2, 'OVERSPEED')
+           RETURNING id`,
           [event.eventId, event.vehicleId],
         );
-        alertCreated = true;
+        alertId = alert.rows[0]?.id ?? null;
       }
 
       const currentStateChanged = await isCurrentEvent(client, event);
       await client.query('COMMIT');
 
-      return { status: 'ACCEPTED', currentStateChanged, alertCreated };
+      return { status: 'ACCEPTED', currentStateChanged, alertId };
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;

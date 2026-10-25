@@ -216,6 +216,44 @@ closure. The validated key was bound to a non-optional constant before use.
 Accepted. `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and 12 tests
 passed.
 
+## Session 5 — Realtime stream
+
+**Goal**
+
+Publish committed telemetry changes to connected clients using SSE.
+
+**Prompt**
+
+Implement an in-process event bus and `/api/stream`. Publish only after the
+per-event transaction commits; do not notify on duplicate, conflict, or
+rejected input.
+
+**Files changed**
+
+- `backend/src/event-bus.ts`
+- `backend/src/app.ts`
+- `backend/src/telemetry-repository.ts`
+- SSE integration tests and OpenAPI/README documentation
+
+**Agent verification**
+
+The SSE test opens a stream, verifies a committed current event emits
+`vehicle.updated`, then verifies a late overspeed emits `alert.created`
+without a `vehicle.updated` message.
+
+**Human verification**
+
+`pnpm typecheck`, `pnpm lint`, `pnpm format:check`, and all 13 integration
+tests passed.
+
+**Mistake/correction**
+
+No correction was required in this session.
+
+**Outcome**
+
+Accepted.
+
 ## Final retrospective points
 
 Al terminar, resumir:
