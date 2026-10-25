@@ -8,6 +8,7 @@ import type { Pool } from 'pg';
 import swaggerUi from 'swagger-ui-express';
 import { EventBus, alertCreated, vehicleUpdated } from './event-bus.js';
 import { openapi } from './openapi.js';
+import { SupportService } from './support-service.js';
 import {
   batchSchema,
   eventIdFrom,
@@ -89,6 +90,7 @@ function summarize(results: BatchResult[]) {
 export function createApp(pool: Pool, ingestApiKey: string) {
   const app = express();
   const repository = new TelemetryRepository(pool);
+  const supportService = new SupportService(pool);
   const eventBus = new EventBus();
 
   app.use(express.json({ limit: '256kb' }));
@@ -162,6 +164,29 @@ export function createApp(pool: Pool, ingestApiKey: string) {
       clearInterval(heartbeat);
       unsubscribe();
     });
+  });
+
+  app.post('/api/support/ask', async (request, response, next) => {
+    const body = request.body;
+    if (
+      !body ||
+      typeof body !== 'object' ||
+      typeof body.question !== 'string' ||
+      body.question.trim() === '' ||
+      (body.vehicleId !== undefined &&
+        (typeof body.vehicleId !== 'string' || body.vehicleId.trim() === ''))
+    ) {
+      response.status(400).json({ error: 'INVALID_SUPPORT_REQUEST' });
+      return;
+    }
+
+    try {
+      response
+        .status(200)
+        .json(await supportService.ask(body.question, body.vehicleId));
+    } catch (error) {
+      next(error);
+    }
   });
 
   app.post('/api/events/batch', async (request, response, next) => {

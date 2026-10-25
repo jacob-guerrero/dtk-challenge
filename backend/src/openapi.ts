@@ -49,5 +49,15 @@ export const openapi = {
         responses: { '200': { description: 'Server-sent event stream' } },
       },
     },
+    '/api/support/ask': {
+      post: {
+        summary: 'Ask a grounded question about FleetPulse runbooks',
+        responses: {
+          '200': {
+            description: 'Grounded answer with citations and retrieval trace',
+          },
+        },
+      },
+    },
   },
 };

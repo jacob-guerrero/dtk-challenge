@@ -294,6 +294,53 @@ tests, and the Angular production build passed. During the live replay, the
 dashboard received SSE updates without a browser reload and showed the
 official final state: 8 vehicles and 4 alerts.
 
+## Session 7 — RAG retrieval and safe extractive answers
+
+**Goal**
+
+Index the supplied Markdown knowledge dynamically in PostgreSQL FTS and
+answer support questions with observable retrieval, literal citations,
+telemetry evidence when relevant, and safe abstention.
+
+**Prompt**
+
+Implement Phase 7 before adding an external LLM. Use PostgreSQL FTS,
+preserve a retrieval trace, treat retrieved knowledge as data, and cover the
+official support fixture plus hostile knowledge.
+
+**Files changed**
+
+- `database/migrations/002_knowledge_chunks.sql`
+- `database/index-knowledge.ts`
+- `backend/src/support-service.ts`
+- support API, OpenAPI, integration tests, and RAG documentation
+
+**Agent verification**
+
+`pnpm knowledge:index` indexed five chunks from five knowledge files.
+`pnpm test:integration` ran indexing and passed 16 tests, including correct
+source retrieval, abstention, telemetry citation, and hostile-KB behavior.
+
+**Human verification**
+
+All six cases from `fixtures/support_questions.json` were sent to
+`POST /api/support/ask`. S-01 through S-06 met their expected grounding and
+source requirements. S-05 retrieved KB-99 only in the trace, cited KB-03,
+and returned no secret.
+
+**Mistake/correction**
+
+The first hostile-KB test retrieved the hostile document but ranked unrelated
+safe chunks above KB-03, so it could not provide the required security
+guidance. The lexical query now expands security-sensitive wording with safe
+policy terms. KB-99 remains trace-only and cannot be cited as authority.
+
+**Outcome**
+
+Accepted. La prueba de extensibilidad también añadió KB-05 sin cambiar
+código, la recuperó con cita y, tras retirar el archivo y reindexar, obtuvo
+abstención sin citas.
+
 ## Final retrospective points
 
 Al terminar, resumir:

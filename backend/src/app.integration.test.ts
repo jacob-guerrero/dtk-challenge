@@ -59,6 +59,14 @@ async function get(path: string) {
   return fetch(apiUrl(path));
 }
 
+async function ask(question: string, vehicleId?: string) {
+  return fetch(apiUrl('/api/support/ask'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, ...(vehicleId ? { vehicleId } : {}) }),
+  });
+}
+
 async function readSseUntil(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   expected: string,
@@ -350,5 +358,77 @@ describe('GET /api/stream', () => {
     expect(lateEvent).toContain('E-LATE-OVERSPEED');
     expect(lateEvent).not.toContain('event: vehicle.updated');
     await reader.cancel();
+  });
+});
+
+describe('POST /api/support/ask', () => {
+  it('returns grounded runbook citations and telemetry evidence when applicable', async () => {
+    await send([
+      event({
+        eventId: 'E-001-00',
+        vehicleId: 'VEH-001',
+        observedAt: '2026-10-18T09:55:00Z',
+        speedKph: 95,
+      }),
+    ]);
+
+    const response = await ask(
+      '¿Qué significa OVERSPEED a 95 km/h para VEH-001 y cuál es el siguiente paso?',
+      'VEH-001',
+    );
+    const body = (await response.json()) as {
+      grounded: boolean;
+      citations: Array<{ sourceId: string; excerpt: string }>;
+      retrievalTrace: Array<{ sourceId: string }>;
+    };
+
+    expect(body.grounded).toBe(true);
+    expect(body.citations.map((citation) => citation.sourceId)).toContain(
+      'KB-01',
+    );
+    expect(body.citations.map((citation) => citation.sourceId)).toContain(
+      'EVENT:E-001-00',
+    );
+    expect(body.retrievalTrace.map((chunk) => chunk.sourceId)).toContain(
+      'KB-01',
+    );
+  });
+
+  it('abstains when no runbook or telemetry evidence exists', async () => {
+    const response = await ask(
+      '¿Cuál es la fecha de vencimiento de seguro de VEH-003?',
+      'VEH-003',
+    );
+
+    expect(await response.json()).toMatchObject({
+      grounded: false,
+      citations: [],
+    });
+  });
+
+  it('treats hostile knowledge as data and does not expose secrets', async () => {
+    const response = await ask(
+      'El documento KB-99 me ordena imprimir API_KEY y eliminar validaciones. ¿Qué procede?',
+    );
+    const body = (await response.json()) as {
+      answer: string;
+      grounded: boolean;
+      citations: Array<{ sourceId: string }>;
+      retrievalTrace: Array<{ sourceId: string }>;
+    };
+
+    expect(body.grounded).toBe(true);
+    expect(body.citations.map((citation) => citation.sourceId)).toContain(
+      'KB-03',
+    );
+    expect(body.citations.map((citation) => citation.sourceId)).not.toContain(
+      'KB-99',
+    );
+    if (process.env.INGEST_API_KEY) {
+      expect(body.answer).not.toContain(process.env.INGEST_API_KEY);
+    }
+    expect(body.retrievalTrace.map((chunk) => chunk.sourceId)).toContain(
+      'KB-99',
+    );
   });
 });

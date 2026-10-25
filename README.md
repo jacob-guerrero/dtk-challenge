@@ -65,6 +65,18 @@ Usar `start`, `pause`, `resume`, `restart`, `status` y `quit`. El intervalo
 por defecto es 750 ms; se puede cambiar en `.env` con `REPLAY_INTERVAL_MS`.
 `restart` reinicia el cursor, no borra la base de datos.
 
+## Incident Copilot
+
+Después de aplicar migraciones, indexar los runbooks Markdown con:
+
+```bash
+pnpm knowledge:index
+```
+
+El índice se reconstruye desde `docs/Paquete_Enviar_Prueba/kit_inicial/knowledge/`
+en cada ejecución. La API `POST /api/support/ask` devuelve respuesta,
+citas, `grounded` y una traza de recuperación; no requiere una API de LLM.
+
 ## Dashboard Angular
 
 Con `pnpm dev` ejecutando la API, iniciar el dashboard en otra terminal:
