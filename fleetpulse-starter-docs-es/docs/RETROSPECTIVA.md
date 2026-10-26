@@ -65,8 +65,9 @@ evidencia están registradas por sesión en `docs/AI-WORKFLOW.md`.
   rechazados; 8 vehículos y 4 alertas.
 - second replay: verificado manualmente: 0 aceptados, 22 duplicados y 2
   rechazados; 4 alertas persistentes.
-- tests/CI: los comandos locales pasaron con 18 tests; el workflow CI queda
-  preparado para su primera ejecución remota.
+- tests/CI: los comandos locales y el primer CI remoto pasaron. El workflow
+  creó PostgreSQL, aplicó ambas migrations, indexó cinco KB y ejecutó 18
+  tests, lint, typecheck, formato y build Angular correctamente.
 - RAG/security: seis casos oficiales, extensibilidad add/remove y Gemini
   opcional verificados; la evidencia está en `docs/RAG-EVALUATION.md`.
 - demo rehearsal: pendiente de grabación final.
