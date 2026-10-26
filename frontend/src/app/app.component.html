@@ -1,0 +1,84 @@
+<main>
+  <header>
+    <div>
+      <p class="eyebrow">FleetPulse</p>
+      <h1>Live fleet operations</h1>
+    </div>
+    <div class="header-actions">
+      <button type="button" (click)="refresh()">Refresh snapshot</button>
+      <p class="connection" [class.online]="connected()">
+        {{ connected() ? 'Live stream connected' : 'Reconnecting stream' }}
+      </p>
+    </div>
+  </header>
+
+  <p *ngIf="error()" class="error">{{ error() }}</p>
+
+  <section class="summary">
+    <article><span>Vehicles</span><strong>{{ vehicles().length }}</strong></article>
+    <article><span>Alerts</span><strong>{{ alerts().length }}</strong></article>
+  </section>
+
+  <section class="grid">
+    <article class="panel fleet-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Fleet</h2>
+          <p>Current state by observed time</p>
+        </div>
+        <input
+          #searchInput
+          [value]="search()"
+          (input)="onSearch(searchInput.value)"
+          placeholder="Search vehicle"
+          aria-label="Search vehicle"
+        />
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Vehicle</th><th>Status</th><th>Speed</th><th>Observed</th></tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let vehicle of vehicles()"
+              (click)="selectVehicle(vehicle.vehicleId)"
+              [class.selected]="selectedVehicleId() === vehicle.vehicleId"
+            >
+              <td>{{ vehicle.vehicleId }}</td>
+              <td><span class="status" [class]="vehicle.status.toLowerCase()">{{ vehicle.status }}</span></td>
+              <td>{{ vehicle.speedKph }} km/h</td>
+              <td>{{ vehicle.observedAt | date: 'medium' }}</td>
+            </tr>
+            <tr *ngIf="vehicles().length === 0"><td colspan="4">No vehicles found.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <aside class="side-column">
+      <article class="panel">
+        <div class="panel-heading"><div><h2>Alerts</h2><p>Historical OVERSPEED events</p></div></div>
+        <ul class="alerts">
+          <li *ngFor="let alert of alerts()">
+            <strong>{{ alert.vehicleId }}</strong>
+            <span>{{ alert.type }} · {{ alert.eventId }}</span>
+          </li>
+          <li *ngIf="alerts().length === 0">No alerts.</li>
+        </ul>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading"><div><h2>History</h2><p>{{ selectedVehicleId() ?? 'Select a vehicle' }}</p></div></div>
+        <ul class="history">
+          <li *ngFor="let item of history()">
+            <strong>{{ item.eventId }}</strong>
+            <span>{{ item.observedAt | date: 'medium' }} · {{ item.speedKph }} km/h</span>
+          </li>
+          <li *ngIf="selectedVehicleId() && history().length === 0">No events.</li>
+        </ul>
+      </article>
+    </aside>
+  </section>
+</main>

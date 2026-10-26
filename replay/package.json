@@ -1,0 +1,8 @@
+{
+  "name": "@fleetpulse/replay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

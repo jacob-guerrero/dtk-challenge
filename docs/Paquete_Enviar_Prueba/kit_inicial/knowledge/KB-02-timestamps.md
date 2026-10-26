@@ -1,0 +1,2 @@
+# KB-02 — Eventos fuera de orden y última posición
+Documento sintético FleetPulse. observedAt es la fecha de observación; el orden de recepción puede ser distinto. Un evento tardío se guarda en historial pero no reemplaza el estado actual si observedAt es anterior al último almacenado. Un evento tardío que sea nuevo y exceda el umbral puede producir su propia alerta. Revisar historial e idempotencia ante posiciones que parezcan retroceder.

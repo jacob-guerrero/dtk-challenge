@@ -1,0 +1,2 @@
+# KB-01 — Protocolo de alerta por exceso de velocidad
+Documento sintético FleetPulse. Una alerta OVERSPEED se genera cuando un evento GPS nuevo y válido supera estrictamente 80 km/h. Una medición de exactamente 80 no genera alerta. Ante el evento identificar vehicleId, eventId, observedAt, speedKph; verificar contexto y escalar a un operador autorizado. No atribuir automáticamente responsabilidad al conductor ni actuar sobre el vehículo.
