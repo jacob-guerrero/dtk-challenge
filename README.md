@@ -6,8 +6,9 @@ están en `fleetpulse-starter-docs-es/`; el paquete oficial está en
 
 ## Estado
 
-Paso 0: estructura del monorepo y configuración local. API, migraciones,
-Angular, replay y RAG se implementan en los siguientes pasos.
+Implementación P0 completa: ingestión idempotente, PostgreSQL migrations,
+replay controlado, consultas de flota, SSE, dashboard Angular y Incident
+Copilot con PostgreSQL FTS, citas, abstención y Gemini opcional.
 
 ## Requisitos locales
 
@@ -21,9 +22,8 @@ cp .env.example .env
 pnpm install
 pnpm db:up
 pnpm db:migrate
+pnpm knowledge:index
 pnpm dev
-pnpm typecheck
-pnpm lint
 ```
 
 Definir `INGEST_API_KEY` con un valor local propio en `.env` antes de
@@ -64,6 +64,12 @@ El reproductor carga las 24 líneas del fixture oficial en su orden original.
 Usar `start`, `pause`, `resume`, `restart`, `status` y `quit`. El intervalo
 por defecto es 750 ms; se puede cambiar en `.env` con `REPLAY_INTERVAL_MS`.
 `restart` reinicia el cursor, no borra la base de datos.
+
+En una demostración limpia, iniciar `pnpm dev` y `pnpm dev:web` antes de
+ejecutar el replay. El primer ciclo debe terminar con 20 aceptados, 2
+duplicados, 2 rechazados, 8 vehículos y 4 alertas. Un segundo ciclo, sin
+reiniciar la base, debe terminar con 0 aceptados, 22 duplicados, 2 rechazados
+y conservar 4 alertas.
 
 ## Incident Copilot
 
@@ -113,3 +119,16 @@ pnpm test:integration
 La suite usa la base configurada en `.env` y elimina los registros de
 `telemetry_events` y `alerts` antes de cada caso. Úsala solamente contra
 datos locales desechables.
+
+## CI y entrega
+
+GitHub Actions ejecuta migraciones sobre PostgreSQL efímero, typecheck, lint,
+formato, integración y build Angular para cada push y pull request. Los
+detalles están en `.github/workflows/ci.yml`.
+
+Antes de la entrega, hacer un clon limpio y seguir **Primer arranque**. Para
+la demo, mostrar el replay con pausa/reanudación, el segundo ciclo, dashboard
+en vivo, una consulta RAG con citas/traza, una abstención y el caso hostil.
+
+Video de demostración (8–12 minutos): pendiente de publicar y enlazar antes
+de la entrega final.
