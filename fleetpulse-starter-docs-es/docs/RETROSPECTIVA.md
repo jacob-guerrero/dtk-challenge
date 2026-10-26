@@ -9,6 +9,8 @@ Registro final de decisiones y evidencia de la implementación P0.
 - Migrations SQL y PostgreSQL como fuente de verdad; estado actual derivado
   por `observedAt` y `eventId`.
 - Replay CLI reproducible, SSE posterior a commit y dashboard Angular CSR.
+- Panel P1 de Incident Copilot en Angular con contexto opcional de vehículo,
+  grounding, citas expandibles y traza de retrieval.
 - Incident Copilot con indexación explícita de Markdown, PostgreSQL FTS,
   citas verificables, abstención y Gemini opcional con fallback extractivo.
 
@@ -65,8 +67,9 @@ evidencia están registradas por sesión en `docs/AI-WORKFLOW.md`.
   rechazados; 8 vehículos y 4 alertas.
 - second replay: verificado manualmente: 0 aceptados, 22 duplicados y 2
   rechazados; 4 alertas persistentes.
-- tests/CI: los comandos locales pasaron con 18 tests; el workflow CI queda
-  preparado para su primera ejecución remota.
+- tests/CI: los comandos locales y el primer CI remoto pasaron. El workflow
+  creó PostgreSQL, aplicó ambas migrations, indexó cinco KB y ejecutó 18
+  tests, lint, typecheck, formato y build Angular correctamente.
 - RAG/security: seis casos oficiales, extensibilidad add/remove y Gemini
   opcional verificados; la evidencia está en `docs/RAG-EVALUATION.md`.
 - demo rehearsal: pendiente de grabación final.

@@ -40,6 +40,18 @@ type AlertCreated = {
   alert: { id: number; type: 'OVERSPEED' };
 };
 
+type Citation = {
+  sourceId: string;
+  excerpt: string;
+};
+
+type SupportAnswer = {
+  answer: string;
+  citations: Citation[];
+  grounded: boolean;
+  retrievalTrace: Array<Citation & { score: number }>;
+};
+
 @Component({
   selector: 'app-root',
   imports: [CommonModule, DatePipe, FormsModule],
@@ -54,6 +66,10 @@ export class AppComponent implements OnInit, OnDestroy {
   readonly search = signal('');
   readonly connected = signal(false);
   readonly error = signal<string | null>(null);
+  readonly supportQuestion = signal('');
+  readonly supportAnswer = signal<SupportAnswer | null>(null);
+  readonly supportLoading = signal(false);
+  readonly supportError = signal<string | null>(null);
 
   private stream?: EventSource;
 
@@ -110,9 +126,43 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+  clearSelectedVehicle() {
+    this.selectedVehicleId.set(null);
+    this.history.set([]);
+  }
+
   onSearch(value: string) {
     this.search.set(value);
     void this.refresh();
+  }
+
+  async askSupport(event: SubmitEvent) {
+    event.preventDefault();
+    const question = this.supportQuestion().trim();
+    if (!question || this.supportLoading()) {
+      return;
+    }
+
+    this.supportLoading.set(true);
+    this.supportError.set(null);
+    try {
+      const vehicleId = this.selectedVehicleId();
+      const answer = await firstValueFrom(
+        this.http.post<SupportAnswer>('/api/support/ask', {
+          question,
+          ...(vehicleId ? { vehicleId } : {}),
+        }),
+      );
+      this.supportAnswer.set(answer);
+    } catch {
+      this.supportError.set('Unable to get a support answer.');
+    } finally {
+      this.supportLoading.set(false);
+    }
+  }
+
+  onSupportQuestion(value: string) {
+    this.supportQuestion.set(value);
   }
 
   private connectStream() {

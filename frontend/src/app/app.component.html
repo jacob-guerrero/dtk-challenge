@@ -15,8 +15,12 @@
   <p *ngIf="error()" class="error">{{ error() }}</p>
 
   <section class="summary">
-    <article><span>Vehicles</span><strong>{{ vehicles().length }}</strong></article>
-    <article><span>Alerts</span><strong>{{ alerts().length }}</strong></article>
+    <article>
+      <span>Vehicles</span><strong>{{ vehicles().length }}</strong>
+    </article>
+    <article>
+      <span>Alerts</span><strong>{{ alerts().length }}</strong>
+    </article>
   </section>
 
   <section class="grid">
@@ -38,7 +42,12 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Vehicle</th><th>Status</th><th>Speed</th><th>Observed</th></tr>
+            <tr>
+              <th>Vehicle</th>
+              <th>Status</th>
+              <th>Speed</th>
+              <th>Observed</th>
+            </tr>
           </thead>
           <tbody>
             <tr
@@ -47,11 +56,17 @@
               [class.selected]="selectedVehicleId() === vehicle.vehicleId"
             >
               <td>{{ vehicle.vehicleId }}</td>
-              <td><span class="status" [class]="vehicle.status.toLowerCase()">{{ vehicle.status }}</span></td>
+              <td>
+                <span class="status" [class]="vehicle.status.toLowerCase()">{{
+                  vehicle.status
+                }}</span>
+              </td>
               <td>{{ vehicle.speedKph }} km/h</td>
               <td>{{ vehicle.observedAt | date: 'medium' }}</td>
             </tr>
-            <tr *ngIf="vehicles().length === 0"><td colspan="4">No vehicles found.</td></tr>
+            <tr *ngIf="vehicles().length === 0">
+              <td colspan="4">No vehicles found.</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -59,7 +74,12 @@
 
     <aside class="side-column">
       <article class="panel">
-        <div class="panel-heading"><div><h2>Alerts</h2><p>Historical OVERSPEED events</p></div></div>
+        <div class="panel-heading">
+          <div>
+            <h2>Alerts</h2>
+            <p>Historical OVERSPEED events</p>
+          </div>
+        </div>
         <ul class="alerts">
           <li *ngFor="let alert of alerts()">
             <strong>{{ alert.vehicleId }}</strong>
@@ -70,14 +90,97 @@
       </article>
 
       <article class="panel">
-        <div class="panel-heading"><div><h2>History</h2><p>{{ selectedVehicleId() ?? 'Select a vehicle' }}</p></div></div>
+        <div class="panel-heading">
+          <div>
+            <h2>History</h2>
+            <p>{{ selectedVehicleId() ?? 'Select a vehicle' }}</p>
+          </div>
+          <button
+            *ngIf="selectedVehicleId()"
+            type="button"
+            class="secondary"
+            (click)="clearSelectedVehicle()"
+          >
+            Clear selection
+          </button>
+        </div>
         <ul class="history">
           <li *ngFor="let item of history()">
             <strong>{{ item.eventId }}</strong>
-            <span>{{ item.observedAt | date: 'medium' }} · {{ item.speedKph }} km/h</span>
+            <span
+              >{{ item.observedAt | date: 'medium' }} ·
+              {{ item.speedKph }} km/h</span
+            >
           </li>
-          <li *ngIf="selectedVehicleId() && history().length === 0">No events.</li>
+          <li *ngIf="selectedVehicleId() && history().length === 0">
+            No events.
+          </li>
         </ul>
+      </article>
+
+      <article class="panel support-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Incident Copilot</h2>
+            <p>
+              {{
+                selectedVehicleId()
+                  ? 'Using ' + selectedVehicleId() + ' as context'
+                  : 'Ask about runbooks or fleet events'
+              }}
+            </p>
+          </div>
+        </div>
+
+        <form class="support-form" (submit)="askSupport($event)">
+          <textarea
+            #supportQuestionInput
+            [value]="supportQuestion()"
+            (input)="onSupportQuestion(supportQuestionInput.value)"
+            placeholder="For example: Is there an alert at exactly 80 km/h?"
+            aria-label="Support question"
+            rows="3"
+          ></textarea>
+          <button
+            type="submit"
+            [disabled]="supportLoading() || !supportQuestion().trim()"
+          >
+            {{ supportLoading() ? 'Asking…' : 'Ask support' }}
+          </button>
+        </form>
+
+        <p *ngIf="supportError()" class="support-error">{{ supportError() }}</p>
+
+        <div *ngIf="supportAnswer() as answer" class="support-answer">
+          <p
+            class="grounding"
+            [class.grounded]="answer.grounded"
+            [class.abstained]="!answer.grounded"
+          >
+            {{ answer.grounded ? 'Grounded answer' : 'Insufficient evidence' }}
+          </p>
+          <p class="answer-text">{{ answer.answer }}</p>
+
+          <div *ngIf="answer.citations.length > 0" class="evidence">
+            <h3>Sources</h3>
+            <details *ngFor="let citation of answer.citations">
+              <summary>{{ citation.sourceId }}</summary>
+              <p>{{ citation.excerpt }}</p>
+            </details>
+          </div>
+
+          <details class="trace" *ngIf="answer.retrievalTrace.length > 0">
+            <summary>
+              Retrieval trace ({{ answer.retrievalTrace.length }})
+            </summary>
+            <ul>
+              <li *ngFor="let item of answer.retrievalTrace">
+                <strong>{{ item.sourceId }}</strong>
+                <span>score {{ item.score }}</span>
+              </li>
+            </ul>
+          </details>
+        </div>
       </article>
     </aside>
   </section>

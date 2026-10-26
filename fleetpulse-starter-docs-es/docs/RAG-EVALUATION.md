@@ -41,6 +41,9 @@ aprobados sin ejecutar `fixtures/support_questions.json` contra la API.
   respondió que exactamente 80 km/h no genera alerta, mantuvo
   `grounded=true`, citó KB-01 y conservó la traza. La clave no se registró
   ni apareció en la respuesta.
+- Panel Angular P1: aprobado manualmente. Reproduce la respuesta estructurada
+  de `/api/support/ask`, muestra grounding, citas y traza, y puede enviar el
+  vehículo seleccionado como contexto o retirar ese contexto.
 
 Registrar evidencia concreta (comando, resumen de respuesta y resultado)
 sin copiar secretos ni inventar salidas.
