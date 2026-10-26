@@ -8,7 +8,9 @@ están en `fleetpulse-starter-docs-es/`; el paquete oficial está en
 
 Implementación P0 completa: ingestión idempotente, PostgreSQL migrations,
 replay controlado, consultas de flota, SSE, dashboard Angular y Incident
-Copilot con PostgreSQL FTS, citas, abstención y Gemini opcional.
+Copilot con PostgreSQL FTS, citas, abstención y Gemini opcional. También se
+incluye el panel P1 de Incident Copilot en Angular. La entrega externa sigue
+pendiente de clean-clone, video y tag final.
 
 ## Requisitos locales
 
@@ -105,6 +107,10 @@ pnpm dev:web
 
 Abrir `http://localhost:4200`. El proxy de desarrollo reenvía `/api` al
 backend local; la API key nunca llega al navegador.
+
+El panel **Incident Copilot** usa el vehículo seleccionado como contexto
+opcional y muestra respuesta, grounding, citas literales y traza de
+recuperación. No envía claves al navegador.
 
 Si se ejecuta `pnpm db:reset` mientras el dashboard ya está abierto, usar
 **Refresh snapshot** antes de iniciar un replay. El reset elimina datos de
