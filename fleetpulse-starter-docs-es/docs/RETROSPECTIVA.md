@@ -9,6 +9,8 @@ Registro final de decisiones y evidencia de la implementación P0.
 - Migrations SQL y PostgreSQL como fuente de verdad; estado actual derivado
   por `observedAt` y `eventId`.
 - Replay CLI reproducible, SSE posterior a commit y dashboard Angular CSR.
+- Panel P1 de Incident Copilot en Angular con contexto opcional de vehículo,
+  grounding, citas expandibles y traza de retrieval.
 - Incident Copilot con indexación explícita de Markdown, PostgreSQL FTS,
   citas verificables, abstención y Gemini opcional con fallback extractivo.
 

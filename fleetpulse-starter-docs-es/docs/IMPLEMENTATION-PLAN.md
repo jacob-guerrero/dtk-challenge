@@ -137,8 +137,9 @@ de citas/abstención.
 - video enlazado desde README, 8–12 minutos (máximo 15);
 - verificar dos ciclos reales y una corrección humana en AI-WORKFLOW.
 
-**Done:** clon limpio y comandos documentados reproducen ambos oráculos;
-CI pasa y la demo cubre realtime, replay y RAG seguro.
+**In progress:** CI pasa, los dos oráculos y RAG seguro están verificados, y
+el panel P1 está disponible para la demo. Faltan el clean-clone final, grabar
+y enlazar el video, y crear el tag de entrega.
 
 ## Orden para agentes
 

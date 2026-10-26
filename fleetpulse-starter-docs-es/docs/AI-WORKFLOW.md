@@ -389,6 +389,47 @@ application citation identity agree.
 Accepted. The default remains extractive; Gemini is optional and retains the
 same application-controlled evidence contract.
 
+## Session 9 — Angular Incident Copilot panel
+
+**Goal**
+
+Add a compact optional P1 chat panel that makes the existing grounded support
+API easier to demonstrate without changing its backend contract.
+
+**Prompt**
+
+Implement only a small Angular panel for support questions. Use the selected
+vehicle as optional context, render application-provided citations and
+retrieval trace, and allow the user to remove vehicle context.
+
+**Files changed**
+
+- `frontend/src/app/app.component.ts`
+- `frontend/src/app/app.component.html`
+- `frontend/src/app/app.component.css`
+- root README and finalization documentation
+
+**Agent verification**
+
+Angular typecheck, lint, formatting, and the production build passed. The
+backend integration suite passed with 18 tests after PostgreSQL was started.
+
+**Human verification**
+
+The panel was tested in the browser against the local API. Its answers,
+grounding, citations, and retrieval trace matched the existing curl/Postman
+verification. Spanish questions work, selected vehicle context is sent when
+present, and **Clear selection** removes it.
+
+**Mistake/correction**
+
+No correction was required in this session.
+
+**Outcome**
+
+Accepted as an optional P1 enhancement. It does not add credentials or change
+the backend RAG security boundary.
+
 ## Final retrospective points
 
 Al terminar, resumir:
