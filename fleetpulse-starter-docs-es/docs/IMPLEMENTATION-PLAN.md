@@ -137,9 +137,10 @@ de citas/abstención.
 - video enlazado desde README, 8–12 minutos (máximo 15);
 - verificar dos ciclos reales y una corrección humana en AI-WORKFLOW.
 
-**In progress:** CI pasa, los dos oráculos y RAG seguro están verificados, y
-el panel P1 está disponible para la demo. Faltan el clean-clone final, grabar
-y enlazar el video, y crear el tag de entrega.
+**Ready for final tag:** CI pasa, los dos oráculos y RAG seguro están
+verificados, el panel P1 está disponible y el clean-clone/video fueron
+completados. Tras fusionar este commit y verificar CI en `main`, crear
+`entrega-final` sin otro cambio de código.
 
 ## Orden para agentes
 
