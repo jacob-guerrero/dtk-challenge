@@ -62,7 +62,8 @@ evidencia están registradas por sesión en `docs/AI-WORKFLOW.md`.
 
 ## Final verification
 
-- fresh clone: pendiente de ejecución final.
+- fresh clone: verificado en la demostración grabada desde un clon limpio;
+  instalación, migrations, indexación, aplicaciones y replay funcionaron.
 - first replay: verificado manualmente: 20 aceptados, 2 duplicados y 2
   rechazados; 8 vehículos y 4 alertas.
 - second replay: verificado manualmente: 0 aceptados, 22 duplicados y 2
@@ -72,5 +73,6 @@ evidencia están registradas por sesión en `docs/AI-WORKFLOW.md`.
   tests, lint, typecheck, formato y build Angular correctamente.
 - RAG/security: seis casos oficiales, extensibilidad add/remove y Gemini
   opcional verificados; la evidencia está en `docs/RAG-EVALUATION.md`.
-- demo rehearsal: pendiente de grabación final.
-- final tag: pendiente de crear después de CI remoto y video.
+- demo rehearsal: grabado en dos partes consecutivas y enlazado desde el
+  README; cubre replay, realtime, RAG seguro, CI y uso de IA agéntica.
+- final tag: pendiente de crear desde `main` después de fusionar este enlace.

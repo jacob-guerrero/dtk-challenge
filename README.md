@@ -10,7 +10,7 @@ Implementación P0 completa: ingestión idempotente, PostgreSQL migrations,
 replay controlado, consultas de flota, SSE, dashboard Angular y Incident
 Copilot con PostgreSQL FTS, citas, abstención y Gemini opcional. También se
 incluye el panel P1 de Incident Copilot en Angular. La entrega externa sigue
-pendiente de clean-clone, video y tag final.
+pendiente únicamente del tag final.
 
 ## Requisitos locales
 
@@ -132,9 +132,14 @@ GitHub Actions ejecuta migraciones sobre PostgreSQL efímero, typecheck, lint,
 formato, integración y build Angular para cada push y pull request. Los
 detalles están en `.github/workflows/ci.yml`.
 
-Antes de la entrega, hacer un clon limpio y seguir **Primer arranque**. Para
-la demo, mostrar el replay con pausa/reanudación, el segundo ciclo, dashboard
-en vivo, una consulta RAG con citas/traza, una abstención y el caso hostil.
+El clean-clone y la demostración verifican el replay con pausa/reanudación,
+el segundo ciclo, dashboard en vivo, consulta RAG con citas/traza, abstención
+y caso hostil.
 
-Video de demostración (8–12 minutos): pendiente de publicar y enlazar antes
-de la entrega final.
+## Video de demostración
+
+La demostración está dividida en dos partes consecutivas (aproximadamente
+10 minutos en conjunto):
+
+1. [Parte 1 — Aplicación, arquitectura y replay](https://www.loom.com/share/7e3877f24be34d2ca075f244d62ecb17)
+2. [Parte 2 — Incident Copilot, calidad y proceso](https://www.loom.com/share/efc2c09cb60943dca48163c25b274f98)
